@@ -1,14 +1,15 @@
 {
-  "name": "template-svelte-esm",
-  "description": "Provides a bare-bones Foundry module template repo to get set up with using the TyphonJS Runtime Library and Svelte with ES Modules.",
+  "name": "koboldtools_foundry",
+  "description": "Koboldtools SoloRPG for foundry",
   "license": "MIT",
   "private": true,
   "type": "module",
-  "author": "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)",
+  "author": "Maugrim",
   "contributors": [
-    "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)"
+    "Maugrim"
   ],
   "dependencies": {
+    "@bulatdashiev/svelte-slider": "^1.0.3",
     "@typhonjs-fvtt/runtime": "^0.0.9",
     "svelte": "^3.46.0"
   },
@@ -16,14 +17,17 @@
     "@babel/core": "^7",
     "@babel/preset-env": "^7",
     "@rollup/plugin-babel": "^5",
+    "@rollup/plugin-node-resolve": "^13.2.1",
     "@typhonjs-config/eslint-config": "^0.3.0",
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "eslint": "^8",
     "rollup": "^2",
     "svelte-preprocess": "^4.10.0"
   },
-
-  "browserslist": [">5%", "not IE 11"],
+  "browserslist": [
+    ">5%",
+    "not IE 11"
+  ],
   "scripts": {
     "build": "rollup --config",
     "build-watch": "rollup --watch --config",

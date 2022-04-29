@@ -1,26 +1,26 @@
 {
-  "name": "template-svelte-esm",
-  "title": "Template Svelte (ESM)",
-  "description": "Provides a bare-bones Foundry module template repo to get set up with using the TyphonJS Runtime Library and Svelte with ES Modules.",
-  "author": "Michael Leahy (TyphonJS) - MLeahy#4299",
+  "name": "koboldtools_foundry",
+  "title": "Koboldtools",
+  "description": "Koboldtools SoloRPG for foundry",
+  "author": "Maugrim",
   "authors": [
     {
-      "name": "Michael Leahy (TyphonJS) - MLeahy#4299",
-      "url": "https://www.typhonjs.io"
+      "name": "Maugrim",
+      "url": "-"
     }
   ],
-  "url": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm",
-  "readme": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm/blob/master/README.md",
-  "bugs": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm/issues",
-  "changelog": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm/releases/latest/",
+  "url": "https://github.com/ryukra/koboldtools_foundry",
+  "readme": "https://github.com/ryukra/koboldtools_foundry/blob/master/README.md",
+  "bugs": "https://github.com/ryukra/koboldtools_foundry/issues",
+  "changelog": "https://github.com/ryukra/koboldtools_foundry/releases/latest/",
   "version": "0.0.0",
   "minimumCoreVersion": "0.8.6",
   "compatibleCoreVersion": "9",
   "esmodules": [
-    "./dist/template-svelte-esm.js"
+    "./dist/koboldtools_foundry.js"
   ],
   "styles": [
-    "./dist/template-svelte-esm.css"
+    "./dist/koboldtools_foundry.css"
   ],
   "languages": [
     {
@@ -32,8 +32,8 @@
   "system": [],
   "dependencies": [],
   "socket": false,
-  "manifest": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm/releases/latest/download/module.json",
-  "download": "https://github.com/typhonjs-fvtt-demo/template-svelte-esm/releases/download/0.0.0/module.zip",
+  "manifest": "https://github.com/ryukra/koboldtools_foundry/releases/latest/download/module.json",
+  "download": "https://github.com/ryukra/koboldtools_foundry/releases/download/0.0.0/module.zip",
   "protected": false,
   "coreTranslation": false,
   "library": false

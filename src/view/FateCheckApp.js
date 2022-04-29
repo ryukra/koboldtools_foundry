@@ -1,8 +1,8 @@
 import { SvelteApplication }  from '@typhonjs-fvtt/runtime/svelte/application';
 
-import BasicAppShell          from './BasicAppShell.svelte';
+import FateCheck          from './FateCheck.svelte';
 
-export default class BasicApplication extends SvelteApplication
+export default class FateCheckApp extends SvelteApplication
 {
    /**
     * Default Application options
@@ -13,11 +13,14 @@ export default class BasicApplication extends SvelteApplication
    static get defaultOptions()
    {
       return foundry.utils.mergeObject(super.defaultOptions, {
-         title: 'TemplateESM.title',  // Automatically localized from `lang/en.json`.
-         width: 300,
+         title: 'Fate',  // Automatically localized from `lang/en.json`.
+         id: 'fatecheck',
+         width: 'auto',
+         popOut: false,
+         height: 'auto',
 
          svelte: {
-            class: BasicAppShell,
+            class: FateCheck,
             target: document.body
          }
       });
