@@ -1,5 +1,9 @@
 
 <div style="font-size:20px;color:black;background-color:rgb(189, 189, 189);border-radius:5px;margin:2px;padding:3px">{{question}}?</div>
+<div style="float:left;margin:2px;padding:3px">{{odds}} </div> {{#if benefit}} <div style="float:left;margin:2px;padding:3px">{{benefit}}</div>{{/if}}
+
+
+
 {{#if answer}}
 <div style="width:auto;font-size:20px;background-color:rgb(50, 119, 50);border-radius:5px;margin:4px;padding:4px;float:right;">YES{{#if exceptional}}!{{/if}}{{#if event}} and..{{/if}}</div>
 {{else}}

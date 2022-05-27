@@ -1,28 +1,32 @@
 <script>
    import { TJSApplicationShell }   from '@typhonjs-fvtt/runtime/svelte/component/core';
-   import RollManager from './RollManager.js';
-   import Slider from '@bulatdashiev/svelte-slider';
-   import { update_await_block_branch } from 'svelte/internal';
+   import { SessionStorage }     from '@typhonjs-fvtt/runtime/svelte/store';
+
    export let elementRoot;
+   const storage = new SessionStorage();
    let eventcheck;
    let detail;
-   let action;
-   let descriptor;
-   let npcs;
-   let threads;
-   let pcs;
+   let descriptors = [];
+   let descriptor_ids = [];
    let lastevent;
+   let storydice;
+   let edit;
    let question;
-   npcs = game.settings.get('koboldtools_foundry','npcs');
-   threads = game.settings.get('koboldtools_foundry','threads');
-   pcs = game.settings.get('koboldtools_foundry','pcs');
    try{
       eventcheck = game.tables.find(entry => entry.id === game.settings.get("koboldtools_foundry",'eventcheck'));
       detail = game.tables.find(entry => entry.id === game.settings.get("koboldtools_foundry",'detail'));
+      storydice = game.tables.find(entry => entry.id === game.settings.get("koboldtools_foundry",'storydice'));
+      descriptor_ids = game.settings.get("koboldtools_foundry",'descriptors');
+      descriptor_ids.forEach(element => {
+         descriptors.push(game.tables.find(entry => entry.id === element));
+         descriptors = descriptors;
+      });
    } catch(error){
       alert("please insert rolltables under meaning");
    }
-   
+   Hooks.on('editmode',() =>{
+      edit = storage.getItem("edit");
+   })
    function onDrop(event)
    {
    // `active` tag must be `true` to handle drop events. The TinyMCE plugin sets this attribute when in edit mode.
@@ -35,11 +39,25 @@
             if(table.name.includes("Event")){
                eventcheck = table;
                game.settings.set("koboldtools_foundry",'eventcheck', table.id);
+               return;
             }
             if(table.name.includes("Detail")){
                detail = table;
                game.settings.set("koboldtools_foundry",'detail', table.id);
+               return;
             }
+            if(table.name.includes("StoryDice")){
+               storydice = table;
+               game.settings.set("koboldtools_foundry",'storydice', table.id);
+               return;
+            }
+            if(!descriptors.includes(table)){
+               descriptors.push(table);
+               descriptor_ids.push(table.id);
+               descriptors = descriptors;
+               game.settings.set("koboldtools_foundry",'descriptors', descriptor_ids);
+            }
+            
          }  
    }
    
@@ -79,26 +97,20 @@
                   target = randomPC.name;
                }
                else{
-                  target = "dummsack, mach erstmal einen PC lol";
+                  target = "Add PCs";
                }
                
                break;
             case 'thread':
-               folder = game.journal.directory.folders.find((f) => f.name === "_fql_quests");
-               let activethreads = [];
-               folder.content.forEach(element => {
-                  let content = element.getFlag('forien-quest-log','json');
-                  if(content.status == 'active'){
-                     activethreads.push(content);
-                  }
-               });
-               if(activethreads.length > 0){
-                  let randomthread = activethreads[Math.floor(Math.random() * activethreads.length)];
+               folder = game.journal.directory.folders.find((f) => f.name === "Threads");
+               if(folder.content.length > 0){
+                  let randomthread = folder.content[Math.floor(Math.random() * folder.content.length)];
                   target = randomthread.name;
                }
                else{
                   target = "Open a new Thread instead";
                }
+               
                
                break;
             default:
@@ -157,16 +169,9 @@
                
                break;
             case 'thread':
-               folder = game.journal.directory.folders.find((f) => f.name === "_fql_quests");
-               let activethreads = [];
-               folder.content.forEach(element => {
-                  let content = element.getFlag('forien-quest-log','json');
-                  if(content.status == 'active'){
-                     activethreads.push(content);
-                  }
-               });
-               if(activethreads.length > 0){
-                  let randomthread = activethreads[Math.floor(Math.random() * activethreads.length)];
+               folder = game.journal.directory.folders.find((f) => f.name === "Threads");
+               if(folder.content.length > 0){
+                  let randomthread = folder.content[Math.floor(Math.random() * folder.content.length)];
                   target = randomthread.name;
                }
                else{
@@ -186,36 +191,35 @@
          await message.setFlag('koboldtools_foundry', 'data', { output: output, target: target});
       }
    }
-   async function rollAction(){
-      let folder = game.tables.directory.folders.find((f) => f.name === "Action");
-      if(folder.content.length > 0){
-         let randomtable = folder.content[Math.floor(Math.random() * folder.content.length)];
-         let roll = await randomtable.draw({displayChat: false});
-         let meanings = await roll.results[0].data.text;
-         randomtable = folder.content[Math.floor(Math.random() * folder.content.length)];
-         roll = await randomtable.draw({displayChat: false});
-         meanings += " ";
-         meanings += await roll.results[0].data.text;
-         const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/MeaningsAction.hbs', {meanings: meanings});
-         const message = await ChatMessage.create({ user: game.user.id, content: rendered_html});
-         await message.setFlag('koboldtools_foundry', 'data', { meanings:meanings});
-      }
+   async function rollDescriptors(table){
+      
+      let check = await table.draw({displayChat: false});
+      let text = "";
+      check.results.forEach(element => {
+         text += element.data.text+" ";
+      });
+      const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/MeaningsDescriptor.hbs', {meanings: text, type: table.name.replace(/ *\([^)]*\) */g, "")});
+      const message = await ChatMessage.create({ user: game.user.id, content: rendered_html});
+      await message.setFlag('koboldtools_foundry', 'data', { meanings: text});
    }
-   async function rollDescriptor(){
-      let folder = game.tables.directory.folders.find((f) => f.name === "Descriptor");
-      if(folder.content.length > 0){
-         let randomtable = folder.content[Math.floor(Math.random() * folder.content.length)];
-         let roll = await randomtable.draw({displayChat: false});
-         let meanings = await roll.results[0].data.text;
-         randomtable = folder.content[Math.floor(Math.random() * folder.content.length)];
-         roll = await randomtable.draw({displayChat: false});
-         meanings += " ";
-         meanings += await roll.results[0].data.text;
-         const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/MeaningsDescriptor.hbs', {meanings: meanings});
-         const message = await ChatMessage.create({ user: game.user.id, content: rendered_html});
-         await message.setFlag('koboldtools_foundry', 'data', { meanings:meanings});
-      }
+   async function removeDescriptor(table){
+      descriptors = descriptors.filter(item => item.id !== table.id);
+      descriptors = descriptors;
+      descriptor_ids = descriptor_ids.filter(item => item !== table.id);
+      game.settings.set("koboldtools_foundry",'descriptors', descriptor_ids);
    }
+   async function storyDice(){
+      storydice.reset();
+      let roll = await storydice.drawMany(4,{displayChat: false});
+      let dice = [];
+      roll.results.forEach(element => {
+         dice.push(element.data.text);
+      });
+      const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/StoryDice.hbs', {dice:dice});
+      const message = await ChatMessage.create({ user: game.user.id, content: rendered_html});
+   }
+  
+   
    async function createMessage(o,t)
    {
       const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/Checks.hbs', {output: o, target:t});
@@ -238,8 +242,6 @@
             {:else}
                <button disabled>Event</button>
             {/if }
-         </div>
-         <div>
             {#if typeof detail === 'object'}
                <button title="{detail.name}" on:click={() => detailCheck()}>Detail</button>
             {:else}
@@ -247,11 +249,14 @@
             {/if }
          </div>
          <div>
-            <button t on:click={() => rollAction()}>Action</button>
+            <button class="fas fa-dice" on:click={() => storyDice() }></button>
          </div>
-         <div>
-            <button  on:click={() => rollDescriptor()}>Descript</button>
+         <div> 
+         {#each descriptors as button}
+            <button title="{button.name}" on:click={() => rollDescriptors(button) }>{button.name.replace(/ *\([^)]*\) */g, "")} </button>{#if edit}<div style="vertical-align:top;font-size:small;" on:click={() => removeDescriptor(button) }>x</div>{/if}
+         {/each}
          </div>
+         
          
       </section>
    </main>
@@ -259,22 +264,15 @@
 
 
 <style lang="scss">
-   input {
-      width:96%;
-      margin: 5px;
-   }
    main {
-   color: white;
+      color: white;
    }
    div {
-      float:left; display:inline;
+      display:inline;
    }
    button {
-      width: 60px;
+      width: auto;
+      height:30px;
    }
-   .container{
-      background-color: red;
-      height:40px;
-      width:100%;
-   }
+
 </style>

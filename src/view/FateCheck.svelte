@@ -6,7 +6,7 @@
 
    export let elementRoot;
    const rm = new RollManager();
-   let chaos = game.user.getFlag('world', 'chaos');
+   let chaos = game.settings.get('koboldtools_foundry', 'chaos');
 	let votingenabled = false;
 	let vote_oods = [2,4];
 	let vote_benefit = [0,1];
@@ -17,7 +17,7 @@
 	let value = [3];
 	let odds = ["impossible","very unlikely","unlikely","50/50","likely","very likely","has to be"];
 	let odds_number = [-8,-4,-2,0,2,4,8];
-	let benefit = ["-2","0","+2"];
+	let benefit;
 	let question = "";
 	let answer = false;
    
@@ -26,16 +26,17 @@
       if(event.keyCode == 13){
          handleFate(0);
       }
-      if(event.keyCode == 37){
+      if(event.keyCode == 40){
          if(value > 0)
             value[0] = value[0]-1;
       }
-      if(event.keyCode == 39){
+      if(event.keyCode == 38){
          if(value < 6)
             value[0] = value[0]+1;
       }
    }
 	function handleFate(mod){
+      benefit = mod;
       let r1 = rm.roll('1d10');
       let r2 = rm.roll('1d10');
       let roll = r1 + r2 + odds_number[value] + mod;
@@ -63,13 +64,18 @@
    async function createMessage(q,a,e,ex)
    {
       q = q.replace(/\?/g,'');
-      const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/FateChatMessage.hbs', {question: q,answer: a, event: e, exceptional: ex});
+      const rendered_html = await renderTemplate('./modules/koboldtools_foundry/template/FateChatMessage.hbs', {odds: odds[value],question: q,answer: a, event: e, exceptional: ex, benefit: benefit});
       const message = await ChatMessage.create({ user: game.user.id, content: rendered_html});
       await message.setFlag('koboldtools_foundry', 'data', { question: q, answer: a, event: e, exceptional: ex });
    }
    Hooks.on("chaos", async function () {
       chaos = game.settings.get('koboldtools_foundry', 'chaos');
    });
+
+   async function vote(){
+      const message = await ChatMessage.create({ user: game.user.id });
+      await message.setFlag('koboldtools_foundry', 'vote', {question: question});
+   }
 </script>
 
 <svelte:options accessors={true}/>
@@ -94,15 +100,20 @@
          </button>
          {#if !votingenabled && chaos == 3 || chaos == 6}
          <div>
-            <button style="width:48%" on:click={() => handleFate(2)}>
+            <button style="width:49%" on:click={() => handleFate(-2)}>
                -2
             </button>
-            <button style="width:48%" on:click={() => handleFate(-2)}>
+            <button style="width:49%" on:click={() => handleFate(2)}>
                +2
             </button>
          </div>
          {/if}
       </div>
+      {#if votingenabled}
+      <div>
+         <button on:click={() => vote()}>Vote</button>
+      </div>
+      {/if}
    </main>
 </TJSApplicationShell>
 

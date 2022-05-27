@@ -22,7 +22,7 @@
             }
             else
             {
-               apps.set(app.id, app.render(true, { focus: true }));
+               apps.set(app.id, app.render(true, { focus: true}));
             }
          }
       }
@@ -33,11 +33,11 @@
          const existingApp = apps.get(NewApplication.defaultOptions.id);
          if (existingApp)
          {
-            existingApp.render(true, { focus: true });
+            existingApp.render(true, { focus: true});
          }
          else
          {
-            const app = new NewApplication().render(true, { focus: true });
+            const app = new NewApplication({ left: button.left, top: button.top  }).render(true, { focus: true });
             apps.set(NewApplication.defaultOptions.id, app);
          }
       }
